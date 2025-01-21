@@ -9,7 +9,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: ["https://jwt-auth-x16v.onrender.com"],
+    origin: ["https://jwt-auth-dipt.onrender.com"],
   })
 );
 
