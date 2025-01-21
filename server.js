@@ -16,7 +16,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/user", userRouter);
+app.use("/api/user", userRouter);   
 
 app.use(express.static(path.join(__dirname, "client", "dist")));
 app.get("*", (req, res) => {
