@@ -1,6 +1,5 @@
 const userModel = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
-const { verify } = require("crypto");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -34,40 +33,40 @@ module.exports = {
       const user = await userModel.getUserByEmail(email);
 
       if (!user) {
-        res.status(404).json({ message: "User not found" });
-        return;
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const passwordMatch = await bcrypt.compare(password + "", user.password);
+      const passwordMatch = await bcrypt.compare(password, user.password);
 
       if (!passwordMatch) {
-        res.status(404).json({ message: "Wrong password" });
-        return;
+        return res.status(401).json({ message: "Incorrect password" });
       }
 
       const { ACCESS_TOKEN_SECRET } = process.env;
 
-      /** generate the token */
+      if (!ACCESS_TOKEN_SECRET) {
+        throw new Error("ACCESS_TOKEN_SECRET is not defined in .env");
+      }
+
       const accessToken = jwt.sign(
         { userid: user.id, email: user.email },
         ACCESS_TOKEN_SECRET,
-        { expiresIn: "60s" }
+        { expiresIn: "15m" }
       );
 
-      /**  */
       res.cookie("token", accessToken, {
         httpOnly: true,
-        maxAge: 60 * 1000,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 15 * 60 * 1000,
       });
 
       res.status(200).json({
-        message: "Login successfully",
+        message: "Login successful",
         user: { userid: user.id, email: user.email },
         token: accessToken,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({
         message: "Internal Server Error",
       });
@@ -76,7 +75,8 @@ module.exports = {
   getAllUsers: async (req, res) => {
     try {
       const users = await userModel.getUsers();
-      res.json(users);
+      const safeUsers = users.map(({ id, email }) => ({ id, email }));
+      res.json(safeUsers);
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -86,37 +86,26 @@ module.exports = {
   },
   logoutUser: (req, res) => {
     res.clearCookie("token");
-    req.cookies["token"] = null;
-    delete req.cookies["token"];
-    /** set the column token to null */
     res.sendStatus(200);
   },
   verifyAuth: (req, res) => {
     const { userid, email } = req.user;
     const { ACCESS_TOKEN_SECRET } = process.env;
 
-    const newAccessToken = jwt.sign({ userid, email }, ACCESS_TOKEN_SECRET, {
-      expiresIn: "60s",
-    });
-
-    // const newRefreshToken = jwt.sign({ userid, email }, REFRESH_TOKEN_SECRET, {
-    //   expiresIn: "7d",
-    // });
+    const newAccessToken = jwt.sign(
+      { userid, email },
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
+    );
 
     res.cookie("token", newAccessToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 15 * 60 * 1000,
     });
 
-    // res.cookie("refreshToken", newAccessToken, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   maxAge: 60 * 1000,
-    // });
-
     res.json({
-      message: "new access token",
+      message: "New access token",
       user: { userid, email },
       token: newAccessToken,
     });

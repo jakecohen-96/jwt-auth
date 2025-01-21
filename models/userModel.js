@@ -5,8 +5,7 @@ module.exports = {
   createUser: async (password, email) => {
     const trx = await db.transaction();
     try {
-      /** hash the password bcrypt / argon2 */
-      const hashPassword = await bcrypt.hash(password + "", 10);
+      const hashPassword = await bcrypt.hash(password, 10);
       const [user] = await trx("users").insert(
         {
           email: email.toLowerCase(),
@@ -16,11 +15,9 @@ module.exports = {
       );
 
       await trx.commit();
-
       return user;
     } catch (error) {
       await trx.rollback();
-      console.log(error);
       throw error;
     }
   },

@@ -5,21 +5,17 @@ const { ACCESS_TOKEN_SECRET } = process.env;
 
 const verifyToken = (req, res, next) => {
   const token = req.cookies["token"];
-  //   console.log(req.headers);
+
   if (!token) {
-    res.status(401).json({ message: "unauthorized user" });
-    return;
+    return res.status(401).json({ message: "Unauthorized user" });
   }
 
   jwt.verify(token, ACCESS_TOKEN_SECRET, (err, decode) => {
     if (err) {
-      res.status(403).json({ message: "forbidden user" });
-      return;
+      return res.status(403).json({ message: "Forbidden user" });
     }
-    console.log(decode);
 
     req.user = decode;
-
     next();
   });
 };

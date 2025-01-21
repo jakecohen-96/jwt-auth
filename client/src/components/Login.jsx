@@ -10,7 +10,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login } = useAuth();
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,9 +22,7 @@ const Login = () => {
         { email, password },
         { withCredentials: true }
       );
-      const { user, token, message } = response.data;
-      console.log({ user, token, message });
-      setError(message);
+      const { user, token } = response.data;
       login(user, token);
       navigate("/");
     } catch (error) {
@@ -34,37 +31,36 @@ const Login = () => {
   };
 
   return (
-    <>
-      <div className='auth-form-container'>
-        <h2>Login</h2>
-        <form className='auth-form' onSubmit={handleSubmit}>
-          <div className='form-group'>
-            <label htmlFor='email'>Email</label>
-            <input
-              id='email'
-              name='email'
-              type='email'
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className='form-group'>
-            <label htmlFor='password'>Password</label>
-            <input
-              id='password'
-              name='password'
-              type='password'
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button type='submit'>Login</button>
-        </form>
-        {error && <div className='error-message'>{error}</div>}
-      </div>
-    </>
+    <div className="auth-form-container">
+      <h2>Login</h2>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      {error && <div className="error-message">{error}</div>}
+    </div>
   );
 };
+
 export default Login;
